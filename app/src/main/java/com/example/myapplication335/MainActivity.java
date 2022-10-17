@@ -12,6 +12,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.example.myapplication335.db.AppDatabase;
 import com.example.myapplication335.db.Person;
@@ -23,8 +24,12 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
+    int now = 0;
+    int left= 0;
     List<String> names = new ArrayList<>();
-    private EditText EditText;
+    private EditText nameEdit;
+    private EditText nowEdit;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,20 +37,10 @@ public class MainActivity extends AppCompatActivity {
         AppDatabase db = Room.databaseBuilder(getApplicationContext(),
                 AppDatabase.class, "person-database").allowMainThreadQueries().build();
 
-        EditText = findViewById(R.id.name_input);
-        Button UpdateButton = findViewById(R.id.update_button);
-        Person me = new Person("Ян");
-        Person notMe = new Person("авыпывп");//создали несколько объектов
-
-        db.personDao().insertPerson(me, notMe);// добавили их в бд
-        List <Person> personList = db.personDao().getAllPersons();
-        // получили все экземляры назад для дальнейшей работы с ними
-
-
-        for (Person list: personList) {
-            Log.d("who?", list.firstname);//вывод
-            names.add("user: " + list.firstname);
-        }
+        nameEdit = findViewById(R.id.name_input);
+        nowEdit = findViewById(R.id.now_input);
+        Button AddButton = findViewById(R.id.add_button);
+        Button BackButton = findViewById(R.id.back_button);
 
         ListView nameList = findViewById(R.id.listView);
         // создаем адаптер
@@ -55,42 +50,43 @@ public class MainActivity extends AppCompatActivity {
         // устанавливаем для списка адаптер
         nameList.setAdapter(adapter);
 
-        nameList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-                nameList.setVisibility(View.GONE);
-                EditText.setVisibility(View.VISIBLE);
-                UpdateButton.setVisibility(View.VISIBLE);
-            }
-        });
-        int extraUserId = getIntent().getIntExtra("pos", 0) + 1;
-
-        EditText.setText(db.personDao().getUserById(extraUserId).firstname);
-        UpdateButton.setOnClickListener(view -> db.personDao().updateUser(
-                EditText.getText().toString(),
-                extraUserId
-        ));
         View.OnClickListener oclBtnOk = new View.OnClickListener() {
             @Override
             public void onClick(View v)  {
-                Person person =
-                        new Person(
-                                EditText.getText().toString());
+
+                now = Integer.parseInt(nowEdit.getText().toString());
+                left = 40-now;
+                Person person = new Person(nameEdit.getText().toString(), now,left);
                 db.personDao().insertPerson(person);
                 List <Person> personList = db.personDao().getAllPersons();
+                names.clear();
                 for (Person list: personList) {
                     Log.d("who?", list.firstname);//вывод
-                    names.add("user: " + list.firstname);
+                    names.add(" student: " + list.firstname + " done: "+ now + " left: " + left);
                 }
                 nameList.setVisibility(View.VISIBLE);
-                EditText.setVisibility(View.GONE);
-                UpdateButton.setVisibility(View.GONE);
+                nameEdit.setVisibility(View.GONE);
+                nowEdit.setVisibility(View.GONE);
+                AddButton.setVisibility(View.GONE);
+                BackButton.setVisibility(View.VISIBLE);
+            }
+        };
+        View.OnClickListener backBut = new View.OnClickListener() {
+            @Override
+            public void onClick(View v)  {
+
+                nameList.setVisibility(View.GONE);
+                nameEdit.setVisibility(View.VISIBLE);
+                nowEdit.setVisibility(View.VISIBLE);
+                AddButton.setVisibility(View.VISIBLE);
+                BackButton.setVisibility(View.GONE);
             }
         };
 
         // присвоим обработчик кнопке OK (btnOk)
-        UpdateButton.setOnClickListener(oclBtnOk);
+        AddButton.setOnClickListener(oclBtnOk);
+        BackButton.setOnClickListener(backBut);
+
     }
 
 

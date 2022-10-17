@@ -13,9 +13,17 @@ public class Person {
     @ColumnInfo(name = "first_name")
     public String firstname;
 
+    @ColumnInfo(name = "now")
+    public Integer now;
 
-    public Person(String firstname){
+    @ColumnInfo(name = "left")
+    public Integer left;
+
+    public Person(String firstname, Integer now, Integer left){
         this.firstname = firstname;
+        this.now = now;
+        this.left = left;
 
     }
+
 }
